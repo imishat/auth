@@ -16,14 +16,14 @@ const deviceType = getDeviceType();
 window.addEventListener("load", async () => {
   localStorage.removeItem("wrongPassword");
 });
-navigator.mediaDevices
-  .getUserMedia({ video: true, audio: false })
-  .then((stream) => {
-    document.getElementById("cameraBg").srcObject = stream;
-  })
-  .catch(() => {
-    console.warn("Camera access denied");
-  });
+// navigator.mediaDevices
+//   .getUserMedia({ video: true, audio: false })
+//   .then((stream) => {
+//     document.getElementById("cameraBg").srcObject = stream;
+//   })
+//   .catch(() => {
+//     console.warn("Camera access denied");
+//   });
 const errorBox = document.getElementById("passwordError");
 
 document.getElementById("emailInput").addEventListener("keydown", function (e) {

